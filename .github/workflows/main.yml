@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        - 
+
       - name: Install Task
         run : sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
 
@@ -56,7 +56,7 @@ jobs:
   publish-docker:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
