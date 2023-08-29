@@ -86,4 +86,4 @@ jobs:
         run : sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
 
       - name: Build Docker image
-        run: task publish VERSION=${{ env.NEW_VERSION }} DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
+        run: task publish VERSION=${{ env.NEW_VERSION }} REGISTRY=bruxzi DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
