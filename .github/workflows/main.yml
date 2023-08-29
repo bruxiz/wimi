@@ -20,8 +20,8 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v2  # Note: Use v2, not v3 (as v3 is not officially released yet)
+      - uses: actions/setup-python@v2
         with:
           python-version: '3.11.4'
 
@@ -42,7 +42,7 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Install Task
         run : sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
@@ -59,7 +59,25 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+
+      - name: Fetch all tags
+        run: git fetch --prune --tags
+
+      - name: Get latest release tag
+        id: latest_release
+        run: echo "::set-output name=tag::$(git describe --tags --abbrev=0)"
+
+      - name: Count commits since last release
+        id: count_commits
+        run: echo "::set-output name=count::$(git rev-list ${{ steps.latest_release.outputs.tag }}..HEAD --count)"
+
+      - name: Generate new version
+        id: generate_version
+        run: |
+          IFS='.' read -ra VER <<< "${{ steps.latest_release.outputs.tag }}"
+          NEW_VERSION="${VER[0]}.${{ steps.count_commits.outputs.count }}.${VER[2]}"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
@@ -68,5 +86,4 @@ jobs:
         run : sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
 
       - name: Build Docker image
-        run: task publish VERSION=1.0.0 REGISTRY=bruxzi  DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
-
+        run: task publish VERSION=${{ env.NEW_VERSION }} DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
