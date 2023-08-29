@@ -1,0 +1,10 @@
+namePrefix: wimi
+
+imageRepository: bruxiz/wimi
+imageTag: 1.0.0
+
+servicePort: 8080
+serviceTargetPort: 8080
+
+ingressEnabled: true
+ingressHostname: wimi.xyz
