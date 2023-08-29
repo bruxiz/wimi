@@ -3,33 +3,23 @@ version: 3
 tasks:
   build:
     cmds:
-      - docker build -t wimi:${ARGS.version} .
+      - docker build -t wimi:{{.VERSION}} .
     description: Build the Docker image
 
   publish:
     cmds:
-      - docker tag wimi:${ARGS.version} ${ARGS.registry_url}/wimi:${ARGS.version}
-      - docker login -u ${ARGS.username} -p ${ARGS.password} ${ARGS.registry_url}
-      - docker push ${ARGS.registry_url}/wimi:${ARGS.version}
+      - docker build -t wimi .
+      - docker tag wimi {{.REGISTRY}}/wimi:{{.VERSION}}
+      - docker login -u {{.DOCKER_USERNAME}} -p {{.DOCKER_PASSWORD}} {{.REGISTRY}}
+      - docker push {{.REGISTRY}}/wimi:{{.VERSION}}
     description: Publish the Docker image
 
   test:
     cmds:
       - pip3 install -r requirements.txt
       - python3 -m unittest test_app.py
-    description: Run unit tests
+    description: Run tests
 
-  pull-request:
-    cmds:
-      - task test
-      - task build
-    description: Run tests and build
-
-  merge:
-    cmds:
-      - task build
-      - task publish
-    description: Run build and publish
 
 options:
   version:
