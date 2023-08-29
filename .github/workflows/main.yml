@@ -23,6 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install flake8
+          
+      - name: Install Task
+        run : sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
 
       - name: Run tests
         run: task test
