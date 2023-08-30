@@ -20,7 +20,7 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
-      - uses: actions/checkout@v2  # Note: Use v2, not v3 (as v3 is not officially released yet)
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v2
         with:
           python-version: '3.11.4'
@@ -76,34 +76,40 @@ jobs:
       - name: Build Docker image
         run: task publish VERSION=${{ env.NEW_VERSION }} REGISTRY=bruxzi DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Notify Slack
-        if: always()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: custom
-          fields: repo,commit,author,action,eventName,ref,workflow,job,took
-          custom_payload: |
-            {
-              text: "${{ job.status == 'success' && 'GitHub Actions Job succeeded!' || 'GitHub Actions Job failed!' }}",
-              attachments: [
-                {
-                  title: "${{ github.actor }} pushed changes",
-                  title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
-                  color: "${{ job.status == 'success' && 'good' || 'danger' }}",
-                  fields: [
-                    {
-                      title: 'Branch',
-                      value: "${{ github.ref }}",
-                      short: true
-                    },
-                    {
-                      title: 'Action URL',
-                      value: "${{ github.event.pull_request.html_url }}",
-                      short: true
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+  notify-slack:
+    needs: [test, build-docker, publish-docker]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        fields: repo,commit,author,action,eventName,ref,workflow,job,took
+        custom_payload: |
+          {
+            text: "${{ needs.build.result == 'success' && needs.test.result == 'success' && needs.deploy.result == 'success' && 'All Jobs succeeded!' || 'One or more jobs failed!' }}",
+            attachments: [
+              {
+                title: "${{ github.actor }} pushed changes",
+                title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
+                color: "${{ needs.build.result == 'success' && needs.test.result == 'success' && needs.deploy.result == 'success' && 'good' || 'danger' }}",
+                fields: [
+                  {
+                    title: 'Branch',
+                    value: "${{ github.ref }}",
+                    short: true
+                  },
+                  {
+                    title: 'Action URL',
+                    value: "${{ github.event.pull_request.html_url }}",
+                    short: true
+                  }
+                ]
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  
