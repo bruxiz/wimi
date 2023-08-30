@@ -89,12 +89,12 @@ jobs:
           fields: repo,commit,author,action,eventName,ref,workflow,job,took
           custom_payload: |
             {
-              text: "${{ needs.test.result == 'success' && needs.build-docker.result == 'success' && needs.publish-docker.result == 'success' && 'All Jobs succeeded!' || 'CI Failed' }}",
+              text: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'All Jobs succeeded!' || 'CI Failed' }}",
               attachments: [
                 {
                   title: "${{ github.actor }} pushed changes",
                   title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
-                  color: "${{ needs.test.result == 'success' && needs.build-docker.result == 'success' && needs.publish-docker.result == 'success' && 'good' || 'danger' }}",
+                  color: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'danger' || 'good' }}",
                   fields: [
                     {
                       title: 'Branch',
@@ -112,4 +112,4 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-  
+
