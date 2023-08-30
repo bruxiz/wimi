@@ -61,24 +61,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Fetch all tags
-        run: git fetch --prune --tags
-
-      - name: Get latest release tag
-        id: latest_release
-        run: echo "::set-output name=tag::$(git describe --tags --abbrev=0)"
-
-      - name: Count commits since last release
-        id: count_commits
-        run: echo "::set-output name=count::$(git rev-list ${{ steps.latest_release.outputs.tag }}..HEAD --count)"
-
-      - name: Generate new version
-        id: generate_version
+      - name: Generate new version to GH Env
         run: |
-          IFS='.' read -ra VER <<< "${{ steps.latest_release.outputs.tag }}"
-          NEW_VERSION="${VER[0]}.${{ steps.count_commits.outputs.count }}.${VER[2]}"
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
+          python generate_version.py > version.txt
+          echo "NEW_VERSION=$(cat version.txt)" >> $GITHUB_ENV
+        
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
 
