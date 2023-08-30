@@ -66,7 +66,7 @@ jobs:
           git fetch --all --tags
           python generate_version.py > version.txt
           echo "NEW_VERSION=$(cat version.txt)" >> $GITHUB_ENV
-        
+
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
 
@@ -82,34 +82,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        status: custom
-        fields: repo,commit,author,action,eventName,ref,workflow,job,took
-        custom_payload: |
-          {
-            text: "${{ needs.build.result == 'success' && needs.test.result == 'success' && needs.deploy.result == 'success' && 'All Jobs succeeded!' || 'One or more jobs failed!' }}",
-            attachments: [
-              {
-                title: "${{ github.actor }} pushed changes",
-                title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
-                color: "${{ needs.build.result == 'success' && needs.test.result == 'success' && needs.deploy.result == 'success' && 'good' || 'danger' }}",
-                fields: [
-                  {
-                    title: 'Branch',
-                    value: "${{ github.ref }}",
-                    short: true
-                  },
-                  {
-                    title: 'Action URL',
-                    value: "${{ github.event.pull_request.html_url }}",
-                    short: true
-                  }
-                ]
-              }
-            ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: repo,commit,author,action,eventName,ref,workflow,job,took
+          custom_payload: |
+            {
+              text: "${{ needs.test.result == 'success' && needs.build-docker.result == 'success' && needs.publish-docker.result == 'success' && 'All Jobs succeeded!' || 'CI Failed' }}",
+              attachments: [
+                {
+                  title: "${{ github.actor }} pushed changes",
+                  title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
+                  color: "${{ needs.test.result == 'success' && needs.build-docker.result == 'success' && needs.publish-docker.result == 'success' && 'good' || 'danger' }}",
+                  fields: [
+                    {
+                      title: 'Branch',
+                      value: "${{ github.ref }}",
+                      short: true
+                    },
+                    {
+                      title: 'Action URL',
+                      value: "${{ github.event.pull_request.html_url }}",
+                      short: true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
   
