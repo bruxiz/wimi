@@ -89,7 +89,7 @@ jobs:
           fields: repo,commit,author,action,eventName,ref,workflow,job,took
           custom_payload: |
             {
-              text: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'All Jobs succeeded!' || 'CI Failed' }}",
+              text: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'WIMI-CI Failed' || 'WIMI-CI Succeeded' }}",
               attachments: [
                 {
                   title: "${{ github.actor }} pushed changes",
