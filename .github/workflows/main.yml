@@ -63,6 +63,7 @@ jobs:
 
       - name: Generate new version to GH Env
         run: |
+          git fetch --all --tags
           python generate_version.py > version.txt
           echo "NEW_VERSION=$(cat version.txt)" >> $GITHUB_ENV
         
@@ -74,3 +75,35 @@ jobs:
 
       - name: Build Docker image
         run: task publish VERSION=${{ env.NEW_VERSION }} REGISTRY=bruxzi DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Notify Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: repo,commit,author,action,eventName,ref,workflow,job,took
+          custom_payload: |
+            {
+              text: "${{ job.status == 'success' && 'GitHub Actions Job succeeded!' || 'GitHub Actions Job failed!' }}",
+              attachments: [
+                {
+                  title: "${{ github.actor }} pushed changes",
+                  title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
+                  color: "${{ job.status == 'success' && 'good' || 'danger' }}",
+                  fields: [
+                    {
+                      title: 'Branch',
+                      value: "${{ github.ref }}",
+                      short: true
+                    },
+                    {
+                      title: 'Action URL',
+                      value: "${{ github.event.pull_request.html_url }}",
+                      short: true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
