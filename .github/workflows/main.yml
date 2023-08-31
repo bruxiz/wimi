@@ -63,7 +63,7 @@ jobs:
 
       - name: Generate new version to GH Env
         run: |
-          git fetch --all --tags
+          git fetch --tags
           python generate_version.py > version.txt
           echo "NEW_VERSION=$(cat version.txt)" >> $GITHUB_ENV
 
@@ -112,4 +112,3 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-
