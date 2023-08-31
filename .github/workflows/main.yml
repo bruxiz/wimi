@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - uses: actions/setup-python@v2
         with:
@@ -67,9 +67,8 @@ jobs:
 
       - name: Generate new version to GH Env
         run: |
-          git fetch --tags
-          python generate_version.py > version.txt
-          echo "NEW_VERSION=$(cat version.txt)" >> $GITHUB_ENV
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          echo "NEW_VERSION=$(python generate_version.py)" >> $GITHUB_ENV
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
