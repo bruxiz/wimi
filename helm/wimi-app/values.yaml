@@ -7,4 +7,3 @@ servicePort: 8080
 serviceTargetPort: 8080
 
 ingressEnabled: true
-ingressHostname: wimi.xyz
