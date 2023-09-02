@@ -20,7 +20,7 @@
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your_username/wimi.git
+git clone https://github.com/bruxiz/wimi.git
 cd wimi
 ```
 
