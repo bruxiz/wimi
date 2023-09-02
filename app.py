@@ -10,8 +10,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def get_ip():
-    user_ip = request.headers.get(request.remote_addr)
+    user_ip = request.headers.get(request.environ['X-Forwarded-For'])
     return user_ip, 200
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1',port=8080, debug=DEBUG_MODE)
+    app.run(host='0.0.0.0',port=8080, debug=DEBUG_MODE)
