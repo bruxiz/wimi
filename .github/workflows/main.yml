@@ -69,3 +69,40 @@ jobs:
 
       - name: Build Docker image
         run: task publish VERSION=${{ github.sha }}-$(date +'%Y%m%d%H%M%S') REGISTRY=bruxiz DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
+        
+  notify-slack:
+    needs: [test, build-docker, publish-docker]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: repo,commit,author,action,eventName,ref,workflow,job,took
+          custom_payload: |
+            {
+              text: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'WIMI-CI Failed' || 'WIMI-CI Succeeded' }}",
+              attachments: [
+                {
+                  title: "${{ github.actor }} pushed changes",
+                  title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
+                  color: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'danger' || 'good' }}",
+                  fields: [
+                    {
+                      title: 'Branch',
+                      value: "${{ github.ref }}",
+                      short: true
+                    },
+                    {
+                      title: 'Action URL',
+                      value: "${{ github.event.pull_request.html_url }}",
+                      short: true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
