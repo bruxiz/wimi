@@ -56,5 +56,5 @@ task test
 The `helm` directory contains Helm charts for deploying this application to a Kubernetes cluster. To deploy the application, run:
 
 ```bash
-helm install wimi ./helm
+task deploy VERSION=$your_version
 ```
