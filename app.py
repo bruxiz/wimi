@@ -17,8 +17,15 @@ def print_request_info(req):
     print(req.form)
     print("\n=== Args ===")
     print(req.args)
-    print("\n=== JSON ===")
-    print(req.json)
+
+    content_type = req.headers.get('Content-Type')
+    if content_type == 'application/json':
+        print("\n=== JSON ===")
+        print(req.json)
+    else:
+        print("\n=== JSON ===")
+        print("Did not attempt to load JSON data because the request Content-Type was not 'application/json'.")
+    
     print("===================")
 
 @app.route('/')
