@@ -55,7 +55,6 @@ jobs:
 
   publish-docker:
     runs-on: ubuntu-latest
-    needs: build-docker
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     env:
