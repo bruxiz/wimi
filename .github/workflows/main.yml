@@ -86,6 +86,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Install Task
+        run : sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+
       - name: Install kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -102,9 +105,9 @@ jobs:
         run: |
           aws eks update-kubeconfig --name wimi-app --region us-east-1
 
-      - name: Get EKS Cluster Info
+      - name: Deploy wimi-app
         run: |
-          kubectl cluster-info
+          task deploy VERSION=latest
 
   notify-slack:
     needs: [test, build-docker, publish-docker, deploy-on-eks]
