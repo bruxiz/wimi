@@ -3,13 +3,12 @@ version: 3
 tasks:
   build:
     cmds:
-      - docker build -t wimi:{{.VERSION}} .
+      - docker build -t bruxiz/wimi:{{.VERSION}} -t bruxiz/wimi:latest .
     description: Build the Docker image
 
   publish:
     cmds:
-      - docker build -t wimi .
-      - docker tag wimi {{.REGISTRY}}/wimi:{{.VERSION}}
+      - docker build -t {{.REGISTRY}}/wimi:{{.VERSION}} -t {{.REGISTRY}}/wimi:latest .
       - docker login -u {{.DOCKER_USERNAME}} -p {{.DOCKER_PASSWORD}}
       - docker push {{.REGISTRY}}/wimi:{{.VERSION}}
     description: Publish the Docker image
