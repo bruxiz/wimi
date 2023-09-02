@@ -1,12 +1,45 @@
 # WIMI - What Is My IP
 
+http://k8s-default-wimiingr-1192713744-2022773118.us-east-1.elb.amazonaws.com/
 ## WIMI is a web app built using Python and Flask that displays user's IP address.
+
+[dockerhub](https://hub.docker.com/r/bruxiz/wimi)
 
 ### CI/CD process visualized below:
 
 ![img.png](img.png)
 
-[dockerhub image](https://hub.docker.com/r/bruxiz/wimi)
+## CI Proccess:
+
+### when a PR is raised:
+
+#### test:
+
+- runs test on the app, runs the app and tests the endpoint (used unittest)
+
+#### build:
+
+- runs docker build to verify that the image can be built from Dockerfile
+
+#### slack:
+
+- notifies in the slack channel if failed in one of them / success
+
+### when a PR is merged / direct merge:
+
+#### build + publish:
+
+- build the image, tags it and publishes to dockerhub
+
+#### deploy:
+
+- logins to aws using credentials (access/secret) to authorized role (to perform operations in the cluster)
+- runs helm upgrade with the previously generated & pushed version
+
+#### slack:
+
+- notifies in the slack channel if failed in one of them / success
+
 
 ## Prerequisites
 
@@ -58,3 +91,11 @@ The `helm` directory contains Helm charts for deploying this application to a Ku
 ```bash
 task deploy VERSION=$your_version
 ```
+
+
+## Challenges
+
+- versioning pattern (decided about sha+date)
+- setting up cluster (had troubles with lb)
+- app (first used remote_addr and got internal IPs… then switched to the header passed by the lb + had to install alb_controller)
+- testing the CI (act was misfunctioning)
