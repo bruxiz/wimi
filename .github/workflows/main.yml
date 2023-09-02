@@ -20,7 +20,7 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2  # Note: Use v2, not v3 (as v3 is not officially released yet)
       - uses: actions/setup-python@v2
         with:
           python-version: '3.11.4'
@@ -59,17 +59,8 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.11.4'
-
-      - name: Generate new version to GH Env
-        run: |
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          echo "NEW_VERSION=$(python generate_version.py)" >> $GITHUB_ENV
-
+        uses: actions/checkout@v2
+        
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
 
@@ -77,41 +68,4 @@ jobs:
         run : sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
 
       - name: Build Docker image
-        run: task publish VERSION=${{ env.NEW_VERSION }} REGISTRY=bruxzi DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
-
-  notify-slack:
-    needs: [test, build-docker, publish-docker]
-    if: always()
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Notify Slack
-        uses: 8398a7/action-slack@v3
-        with:
-          status: custom
-          fields: repo,commit,author,action,eventName,ref,workflow,job,took
-          custom_payload: |
-            {
-              text: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'WIMI-CI Failed' || 'WIMI-CI Succeeded' }}",
-              attachments: [
-                {
-                  title: "${{ github.actor }} pushed changes",
-                  title_link: "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}",
-                  color: "${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' || needs.publish-docker.result == 'failure' && 'danger' || 'good' }}",
-                  fields: [
-                    {
-                      title: 'Branch',
-                      value: "${{ github.ref }}",
-                      short: true
-                    },
-                    {
-                      title: 'Action URL',
-                      value: "${{ github.event.pull_request.html_url }}",
-                      short: true
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        run: task publish VERSION=${{ github.sha }}-$(date +'%Y%m%d%H%M%S') REGISTRY=bruxzi DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
