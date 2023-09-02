@@ -5,6 +5,9 @@
 ### CI/CD process visualized below:
 
 ![img.png](img.png)
+
+[dockerhub image](https://hub.docker.com/r/bruxiz/wimi)
+
 ## Prerequisites
 
 - Python3 (https://www.python.org/downloads/)
