@@ -20,3 +20,6 @@ tasks:
       - python3 -m unittest test_app.py
     description: Run tests
 
+  deploy:
+    cmds:
+      - helm upgrade --install wimi ./helm/wimi-app --set imageTag={{.VERSION}}
