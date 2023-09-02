@@ -72,7 +72,7 @@ jobs:
 
       - name: Generate VERSION variable
         id: generate-version
-        run: echo "VERSION=${{ github.sha }}-$(date +'%Y%m%d%H%M%S')" >> GITHUB_OUTPUT
+        run: echo "VERSION=${{ github.sha }}-$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
       - name: Build Docker image
         run: task publish VERSION=${{ steps.generate-version.outputs.VERSION }} REGISTRY=bruxiz DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
