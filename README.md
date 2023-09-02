@@ -1,6 +1,9 @@
 # WIMI - What Is My IP
 
-WIMI is a web app built using Python and Flask that displays user's IP address.
+##WIMI is a web app built using Python and Flask that displays user's IP address.
+
+###CI/CD process visualized below:
+
 ![img.png](img.png)
 ## Prerequisites
 
