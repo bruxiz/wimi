@@ -10,7 +10,7 @@ tasks:
     cmds:
       - docker build -t {{.REGISTRY}}/wimi:{{.VERSION}} -t {{.REGISTRY}}/wimi:latest .
       - docker login -u {{.DOCKER_USERNAME}} -p {{.DOCKER_PASSWORD}}
-      - docker push --all-tags {{.REGISTRY}}/wimi:{{.VERSION}}
+      - docker push {{.REGISTRY}}/wimi
     description: Publish the Docker image
 
   test:
