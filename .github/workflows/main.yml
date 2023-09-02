@@ -55,10 +55,9 @@ jobs:
 
   publish-docker:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{steps.generate-version.outputs.VERSION}}
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    env:
-      VERSION: ''
 
     steps:
       - name: Checkout code
@@ -113,8 +112,10 @@ jobs:
           aws eks update-kubeconfig --name wimi-app --region us-east-1
 
       - name: Deploy wimi-app
+        env: 
+          VERSION: ${{needs.publish-docker.outputs.VERSION}}
         run: |
-          task deploy VERSION=${{ steps.generate-version.outputs.VERSION }}
+          task deploy VERSION=$VERSION
 
   notify-slack:
     needs: [test, build-docker, publish-docker, deploy-on-eks]
